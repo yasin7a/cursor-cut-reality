@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A WebGL2 hero banner you can slice open with your cursor." />
+    <meta name="theme-color" content="#0c0d0f" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Cursor Cut Reality</title>
+  </head>
+  <body>
+    <main>
+      <section id="hero" class="hero">
+        <div class="hero__content">
+          <p class="eyebrow rise" style="animation-delay: 80ms">WebGL2 · Open source</p>
+          <h1 class="hero__title">
+            <span class="mask"><span class="line" style="animation-delay: 180ms">Cut through</span></span>
+            <span class="mask"><span class="line sheen" style="animation-delay: 300ms, 640ms">the surface.</span></span>
+          </h1>
+          <p class="hero__lede rise" style="animation-delay: 720ms">
+            Move your cursor fast. The page splits open, shows the code underneath, and heals itself a second later.
+          </p>
+        </div>
+
+        <footer class="hero__footer rise" style="animation-delay: 960ms">
+          <p class="hint" id="hint">Swipe fast across the page</p>
+          <button type="button" class="sound" id="sound" aria-pressed="true" hidden>
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 5 6 9H2v6h4l5 4V5z" />
+              <path class="sound__wave" d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+              <path class="sound__wave" d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path class="sound__off" d="m22 9-6 6M16 9l6 6" />
+            </svg>
+            <span class="sound__label">Sound on</span>
+          </button>
+        </footer>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

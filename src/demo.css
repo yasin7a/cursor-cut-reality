@@ -1,0 +1,209 @@
+/* The demo page around the effect. Only hero-rift/hero-rift.css is needed for the effect itself. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: dark;
+  --fg: 220 12% 94%;
+  --muted: 220 6% 66%;
+  --subtle: 220 6% 53%;
+  --line: 220 8% 17%;
+  --accent-text: 43 68% 78%;
+  --sheen-hi: 45 74% 91%;
+}
+
+/* Light theme: put data-theme="light" on <html> (the demo does it for ?theme=light). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --fg: 220 16% 11%;
+  --muted: 220 8% 35%;
+  --subtle: 220 6% 42%;
+  --line: 36 12% 87%;
+  --accent-text: 33 82% 30%;
+  --sheen-hi: 33 82% 30%;
+}
+
+html,
+body {
+  margin: 0;
+  background: hsl(220 13% 5%);
+  color: hsl(var(--fg));
+  font-family: "Inter Variable", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="light"],
+:root[data-theme="light"] body {
+  background: hsl(40 18% 97%);
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+.hero__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 96px 24px 48px;
+}
+
+.eyebrow {
+  margin: 0 0 28px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: hsl(var(--accent-text));
+}
+
+.hero__title {
+  margin: 0;
+  font-size: clamp(3rem, 9vw, 7.5rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.hero__lede {
+  max-width: 34ch;
+  margin: 36px 0 0;
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  line-height: 1.5;
+  color: hsl(var(--muted));
+}
+
+.hero__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  border-top: 1px solid hsl(var(--line) / 0.6);
+}
+
+.hint,
+.sound {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--subtle));
+}
+
+.sound {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: color 150ms;
+}
+.sound[hidden] {
+  display: none;
+}
+.sound:hover,
+.sound:focus-visible {
+  color: hsl(var(--accent-text));
+}
+.sound:focus-visible {
+  outline: 2px solid hsl(var(--accent-text));
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.sound[aria-pressed="true"] .sound__off,
+.sound[aria-pressed="false"] .sound__wave {
+  display: none;
+}
+
+/* Entrance: each title line rises out of its own clipping mask. */
+.mask {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+  margin-bottom: -0.06em;
+}
+.line {
+  display: block;
+  animation: line 1.05s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes line {
+  from {
+    transform: translateY(106%);
+  }
+  to {
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* White-gold inlay with one sweep on load. */
+.sheen {
+  background-image: linear-gradient(
+    104deg,
+    hsl(var(--fg)) 18%,
+    hsl(var(--accent-text)) 40%,
+    hsl(var(--sheen-hi)) 50%,
+    hsl(var(--accent-text)) 60%,
+    hsl(var(--fg)) 82%
+  );
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation:
+    line 1.05s cubic-bezier(0.22, 1, 0.36, 1) both,
+    sheen 1.9s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes sheen {
+  from {
+    background-position: 118% 0;
+  }
+  to {
+    background-position: 34% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line,
+  .rise,
+  .sheen {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero__content {
+    padding: 72px 16px 40px;
+  }
+  .hero__footer {
+    padding: 16px;
+  }
+}

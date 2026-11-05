@@ -1,0 +1,71 @@
+/*
+ * Cursor Cut Reality — the layers behind the hero.
+ *
+ * The rift shader rebuilds .hero-rift__grid and .hero-rift__atmosphere under
+ * its lens, so it can bend them without a visible seam. Change the grid or the
+ * gradients here and surface() in shaders.ts must follow, or the lens edge
+ * will show.
+ *
+ * Colours are space-separated HSL ("220 13% 5%"), the format the shader reads.
+ */
+.hero-rift {
+  --rift-bg: 220 13% 5%;
+  --rift-fg: 220 12% 94%;
+  --rift-accent: 43 58% 85%;
+  /* The lip's colour on a light background (on a dark one it is white-hot). */
+  --rift-accent-strong: 45 74% 91%;
+  --rift-font-mono: "JetBrains Mono";
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: hsl(var(--rift-bg));
+}
+
+/* Light theme example: put data-theme="light" on the hero or on <html>. */
+.hero-rift[data-theme="light"],
+[data-theme="light"] .hero-rift {
+  --rift-bg: 40 18% 97%;
+  --rift-fg: 220 16% 11%;
+  --rift-accent: 41 55% 60%;
+  --rift-accent-strong: 41 58% 52%;
+}
+
+.hero-rift__grid,
+.hero-rift__atmosphere,
+.hero-rift__canvas {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hero-rift__canvas {
+  width: 100%;
+  height: 100%;
+}
+
+/* Blueprint grid: 1px lines every 64px, fading out from the top centre. */
+.hero-rift__grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--rift-fg) / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--rift-fg) / 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, #000 20%, transparent 75%);
+}
+
+/* Two fixed light sources over fine film grain. */
+.hero-rift__atmosphere {
+  background:
+    radial-gradient(760px circle at 78% 10%, hsl(var(--rift-accent) / 0.1), transparent 64%),
+    radial-gradient(520px circle at 6% 94%, hsl(var(--rift-accent) / 0.05), transparent 60%);
+}
+
+.hero-rift__atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
