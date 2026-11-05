@@ -86,6 +86,7 @@ uniform sampler2D uCode;
 uniform vec2 uCodeSize;       // css px
 uniform vec3 uBg, uFg, uAccent, uRim, uGlow, uViolet;
 uniform float uDark;
+uniform float uPass;          // 0 = everything; 1 = only the lens (grid bending); 2 = only the cut (inside + rim)
 
 out vec4 outColor;
 
@@ -206,7 +207,11 @@ void main() {
   float open = smoothstep(.4, 3., hw);
   vec4 col = vec4(0.);
 
-  if (h.e > 0.) {
+  bool lens = uPass < 1.5;               // pass 0 or 1
+  bool cut = uPass < .5 || uPass > 1.5;  // pass 0 or 2
+  if (h.e > 0. && !lens) {
+    // Cut-only pass (drawn over the page content): outside the cut stays clear.
+  } else if (h.e > 0.) {
     float e = h.e;
     const float R = LENS_RADIUS;
     float f = exp(-(e * e) / (R * R)) * (1. - smoothstep(1.6 * R, LENS_CUTOFF * R, e));
@@ -230,7 +235,7 @@ void main() {
       }
       col = vec4(c * a, a);
     }
-  } else {
+  } else if (cut) {
     float x = clamp(h.d / max(hw, 1e-3), 0., 1.);
     // A window with depth: deep space drifts and shifts most, the code less.
     vec2 deep = p * .7 + uParallax * 34. + vec2(uTime * 5., uTime * 1.5);
@@ -253,7 +258,7 @@ void main() {
   // Only the cut's own edge is lit: a crisp hairline, no halo or shadow
   // around it. It cools as the cut heals — white-hot behind the blade, then
   // gold, then amber.
-  float rim = exp(-abs(h.e) / 1.4) * open * .95;
+  float rim = cut ? exp(-abs(h.e) / 1.4) * open * .95 : 0.;
   vec3 rimCol = mix(uRim, mix(uGlow, vec3(.85, .38, .12), .35 * uDark), smoothstep(.06, .55, h.age));
   col = over(vec4(rimCol, 1.) * rim, col);
   col.rgb += (hash(gl_FragCoord.xy) - .5) * .03 * col.a;

@@ -14,6 +14,10 @@ export type EngineOptions = {
   soundUrl: string | null;
   /** Whether the sound starts on (it still needs one click/key press first — a browser rule). */
   soundEnabled: boolean;
+  /** Draw the cut over the page content (this canvas sits above it). */
+  over: boolean;
+  /** With `over`: a canvas BEHIND the content that receives the lens (the grid bending), so it shows under the text. */
+  lensCanvas: HTMLCanvasElement | null;
 };
 
 export type RiftController = {
@@ -45,7 +49,7 @@ type Resources = {
 
 const MAIN_UNIFORMS = [
   "uPts", "uSeg", "uCount", "uRes", "uSize", "uScale", "uTime", "uParallax", "uNebula", "uCode",
-  "uCodeSize", "uBg", "uFg", "uAccent", "uRim", "uGlow", "uViolet", "uDark",
+  "uCodeSize", "uBg", "uFg", "uAccent", "uRim", "uGlow", "uViolet", "uDark", "uPass",
 ];
 const PARTICLE_UNIFORMS = ["uRes", "uScale", "uGlow", "uViolet", "uAlpha"];
 
@@ -205,6 +209,9 @@ export function createRiftEngine(canvas: HTMLCanvasElement, section: HTMLElement
     powerPreference: "high-performance",
   });
   if (!gl) return null;
+  const lens2d = options.over && options.lensCanvas ? options.lensCanvas.getContext("2d") : null;
+  /** The device-pixel rect copied to the lens canvas last frame (top-left origin), cleared before the next copy. */
+  const lensRect = { x: 0, y: 0, w: 0, h: 0 };
 
   let res: Resources | null = null;
   let disposed = false;
@@ -299,6 +306,11 @@ export function createRiftEngine(canvas: HTMLCanvasElement, section: HTMLElement
       canvas.width = w;
       canvas.height = h;
     }
+    if (lens2d && (lens2d.canvas.width !== w || lens2d.canvas.height !== h)) {
+      lens2d.canvas.width = w;
+      lens2d.canvas.height = h;
+      lensRect.w = 0;
+    }
     scale = cssW > 0 ? w / cssW : target;
     gl.viewport(0, 0, w, h);
     applyStatic();
@@ -306,10 +318,15 @@ export function createRiftEngine(canvas: HTMLCanvasElement, section: HTMLElement
   };
 
   // ------------------------------------------------------------ drawing
+  const clearLens = () => {
+    if (lens2d && lensRect.w > 0) lens2d.clearRect(lensRect.x, lensRect.y, lensRect.w, lensRect.h);
+    lensRect.w = 0;
+  };
   const clear = () => {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    clearLens();
   };
 
   const bindTextures = (r: Resources) => {
@@ -389,6 +406,24 @@ export function createRiftEngine(canvas: HTMLCanvasElement, section: HTMLElement
       gl.uniform2f(u.uParallax, parX, parY);
       bindTextures(res);
       gl.bindVertexArray(res.quad);
+      if (lens2d) {
+        // Two layers: the lens goes to the canvas behind the content, the cut stays on this one, over it.
+        gl.uniform1f(u.uPass, 1);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        const x = sx0;
+        const y = canvas.height - sy1; // 2D canvases count rows from the top
+        const w = sx1 - sx0;
+        const h = sy1 - sy0;
+        lens2d.drawImage(canvas, x, y, w, h, x, y, w, h);
+        lensRect.x = x;
+        lensRect.y = y;
+        lensRect.w = w;
+        lensRect.h = h;
+        gl.clear(gl.COLOR_BUFFER_BIT); // scissored: only the box
+        gl.uniform1f(u.uPass, 2);
+      } else {
+        gl.uniform1f(u.uPass, options.over ? 2 : 0);
+      }
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 

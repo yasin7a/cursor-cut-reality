@@ -33,6 +33,7 @@
 
 .hero-rift__grid,
 .hero-rift__atmosphere,
+.hero-rift__lens,
 .hero-rift__canvas {
   position: absolute;
   inset: 0;
@@ -40,9 +41,15 @@
   pointer-events: none;
 }
 
+.hero-rift__lens,
 .hero-rift__canvas {
   width: 100%;
   height: 100%;
+}
+
+/* layer: "over" — the cut above the hero's content. Raise --rift-over-z if your content has its own z-index. */
+.hero-rift--over .hero-rift__canvas {
+  z-index: var(--rift-over-z, 1);
 }
 
 /* Blueprint grid: 1px lines every 64px, fading out from the top centre. */

@@ -24,7 +24,9 @@ const readSound = () => {
   }
 };
 
-const rift = createHeroRift(section, { sound: SOUND_URL, soundEnabled: readSound() });
+// The demo draws the cut over the text; ?layer=behind shows the other mode.
+const layer = new URLSearchParams(location.search).get("layer") === "behind" ? "behind" : "over";
+const rift = createHeroRift(section, { sound: SOUND_URL, soundEnabled: readSound(), layer });
 
 if (!canRunHeroRift()) {
   hint.textContent = window.matchMedia("(prefers-reduced-motion: reduce)").matches

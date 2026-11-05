@@ -8,6 +8,13 @@ export type HeroRiftOptions = {
   sound?: string;
   /** Start with the sound on. Default true. (Audio still waits for one click or key press — a browser rule.) */
   soundEnabled?: boolean;
+  /**
+   * "behind" (default): the whole effect sits under the hero's content.
+   * "over": the cut is drawn on top of the hero's content (text, buttons), while
+   * the grid bending around it stays behind the content so text stays sharp.
+   * Clicks pass through either way.
+   */
+  layer?: "behind" | "over";
 };
 
 export type HeroRift = {
@@ -42,11 +49,15 @@ const layer = (tag: "div" | "canvas", className: string) => {
  * competes with the page's first paint.
  */
 export function createHeroRift(section: HTMLElement, options: HeroRiftOptions = {}): HeroRift {
+  const over = options.layer === "over";
   section.classList.add("hero-rift");
+  if (over) section.classList.add("hero-rift--over");
   const grid = layer("div", "hero-rift__grid");
   const atmosphere = layer("div", "hero-rift__atmosphere");
+  // In "over" mode the grid bending gets its own canvas in the background slot.
+  const lens = over ? (layer("canvas", "hero-rift__lens") as HTMLCanvasElement) : null;
   const canvas = layer("canvas", "hero-rift__canvas") as HTMLCanvasElement;
-  section.prepend(grid, atmosphere, canvas);
+  section.prepend(...(lens ? [grid, atmosphere, lens, canvas] : [grid, atmosphere, canvas]));
 
   const fine = window.matchMedia("(pointer: fine)");
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -69,6 +80,8 @@ export function createHeroRift(section: HTMLElement, options: HeroRiftOptions = 
           fontFamily: mono,
           soundUrl: options.sound ?? null,
           soundEnabled,
+          over,
+          lensCanvas: lens,
         });
       })
       .catch((error) => console.warn("hero-rift: engine failed to load", error))
@@ -107,8 +120,9 @@ export function createHeroRift(section: HTMLElement, options: HeroRiftOptions = 
       stop();
       grid.remove();
       atmosphere.remove();
+      lens?.remove();
       canvas.remove();
-      section.classList.remove("hero-rift");
+      section.classList.remove("hero-rift", "hero-rift--over");
     },
   };
 }

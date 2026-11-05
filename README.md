@@ -4,15 +4,17 @@ A WebGL2 hero banner you can slice open with your cursor.
 
 Move the mouse fast and the page splits along the blade's path. The grid around the cut bends away from it, code glows inside it over deep space, and the cut heals about a second later. Slow movement does nothing, so the page stays calm while people read it.
 
+The cut can run behind your content or straight over it, through your headline.
+
 Inspired by the reality-tearing rifts in *Doctor Strange in the Multiverse of Madness*.
 
-![A fast swipe has cut the hero open: code glows inside the cut and the grid bends around it](docs/screenshots/cut.webp)
+![A fast swipe has cut across the headline: code glows inside the cut, over the text](docs/screenshots/cut.webp)
 
 <!-- Drop a screen recording here: on GitHub, edit this file and drag an .mp4 into the editor. -->
 
 | Inside the cut | Light theme |
 | --- | --- |
-| ![Close-up of the cut: code over deep space, with a thin glowing edge](docs/screenshots/closeup.webp) | ![The same effect on a light background](docs/screenshots/light.webp) |
+| ![Close-up of the cut crossing the headline: code over deep space, with a thin glowing edge](docs/screenshots/closeup.webp) | ![The same effect on a light background](docs/screenshots/light.webp) |
 
 ## Try it
 
@@ -21,7 +23,7 @@ npm install
 npm run dev
 ```
 
-Open the printed URL on a computer with a mouse or trackpad, and swipe fast across the page. Add `?theme=light` to the URL for the light theme.
+Open the printed URL on a computer with a mouse or trackpad, and swipe fast across the page. Add `?theme=light` to the URL for the light theme, or `?layer=behind` to keep the cut under the text.
 
 Requires Node 20.19 or newer.
 
@@ -75,8 +77,25 @@ export default function Hero() {
 | `code` | a few lines of the rift's own source | The text that shows through the cut. Use your own code. |
 | `sound` | none | URL of a short whoosh or hit. Leave it out for a silent rift. |
 | `soundEnabled` | `true` | Start with the sound on or off. |
+| `layer` | `"behind"` | `"over"` draws the cut on top of the hero's content. The grid still bends behind the content, so text stays sharp. |
 
 The returned object has `setSoundEnabled(on)`, `destroy()`, and `active` (false when the effect isn't running on this device).
+
+### Over the content
+
+With `layer: "over"` the cut is drawn above the hero's text and buttons. The bending grid is drawn on a second canvas behind the content, so the text never gets painted over. Clicks still go through to your content.
+
+The cut stays inside the hero's own layer, so a fixed site header still covers it. To draw it above the header as well, let the hero join the page's layers and raise the cut:
+
+```css
+#hero {
+  isolation: auto;               /* the hero no longer keeps its layers to itself */
+  background-color: transparent; /* the page background now shows behind the grid */
+  --rift-over-z: 60;             /* higher than your header's z-index */
+}
+```
+
+This only works if the page background is set on `html`, in the hero's colour. `body` and every element between it and the hero must have no background of their own, or they cover the grid.
 
 ### Colours
 
